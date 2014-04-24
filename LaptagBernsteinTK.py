@@ -97,23 +97,40 @@ class infoFrameClass(Frame):
         #path widgets
         self.font = ('Ubuntu', 12)
         self.initPathWidgets()
+        self.initMathWidgets()
+
+    def initMathWidgets(self):
+        #Label
+        self.mathLabel = Label(self.infoFrame, text='Math Analysis', font=self.font)
+        self.mathLabel['foreground'] = 'blue'
+        self.mathLabel.grid(column=1, row=0, pady=5, padx=20)
+        #maybe a math file entry box
+        self.mathEntryText = StringVar()
+        self.mathEntry = Entry(self.infoFrame, text=self.mathEntryText)
+        self.mathEntry.insert(0, 'Maybe Temporary')
+        self.mathEntry.grid(column=1, row=1, pady=5, padx=20)
+        #button to make graph
+        self.mathButton = Button(self.infoFrame, text="Graph", command=self.mathButtonCmd)
+        self.mathButton.grid(column=1, row=2, pady=5, padx=20)
 
     def initPathWidgets(self):
         #Label
         self.infoFrameLabel = Label(self.infoFrame, text='Data File Path', font=self.font)
         self.infoFrameLabel['foreground'] = 'green'
-        self.infoFrameLabel.grid(column=0, row=0, pady=5)
+        self.infoFrameLabel.grid(column=0, row=0, pady=5, padx=10)
         #path entry box
         self.pathEntryText = StringVar()
         self.pathEntry = Entry(self.infoFrame, text=self.pathEntryText)
         self.pathEntry.insert(0, dataFilePath)
-        self.pathEntry.grid(column=0, row=1, pady=5)
+        self.pathEntry.grid(column=0, row=1, pady=5, padx=10)
         #button
         self.pathButton = Button(self.infoFrame, text="Update", command=self.pathButtonCmd)
-        self.pathButton.grid(column=0, row=2, pady=5)
+        self.pathButton.grid(column=0, row=2, pady=5, padx=10)
     def pathButtonCmd(self):
         path = self.pathEntry.get()
         dataTreeFrame.update_DataTree(path)
+    def mathButtonCmd(self):
+        print("You clicked the Graph Button")
 
 
 #class that defines the datatree class
