@@ -7,10 +7,7 @@ written by Sam Thomas
 #imports
 from tkinter import *
 from tkinter.ttk import *
-import matplotlib
-
 import matplotlib.pyplot as plt
-import numpy as np
 import sys
 
 #global vars
@@ -20,8 +17,10 @@ window_height = 600
 #argument
 try:
     dataFilePath = sys.argv[1]
+    mathFilePath = sys.argv[2]
 except:
     dataFilePath = ''
+    mathFilePath = ''
     print("No Path Given")
 
 #TK Window
@@ -55,6 +54,21 @@ class main_window(Frame):
     def _initUI(self):
         #names the window
         self.parent.title("Laptag Bernstein Wave TK - WIP")
+
+        #menubar
+        self.menubar = Menu(self.parent)
+        self.filemenu = Menu(self.menubar, tearoff=0)
+        self.filemenu.add_command(label="Save", command=self.save)
+        self.filemenu.add_separator()
+        self.filemenu.add_command(label="Quit", command=self.parent.quit)
+        self.menubar.add_cascade(label="File", menu=self.filemenu)
+
+        #display menubar
+        self.parent.config(menu=self.menubar)
+
+    def save(self):
+        #TODO - add save functionality
+        print('save')
 
     #center window
     def centerWindow(self):
@@ -98,41 +112,87 @@ class infoFrameClass(Frame):
         self.font = ('Ubuntu', 12)
         self.initPathWidgets()
         self.initMathWidgets()
+        self.initGraphWidgets()
+
+        self.arrays = []
+        self.mathFileImport = None
+
+    def initGraphWidgets(self):
+        #graph button
+        self.graphButton = Button(self.infoFrame, text="Graph", command=self.graphButtonCmd)
+        self.graphButton.grid(column=0, row=4, pady=5, padx=10)
+        #close graph button
+        self.closeGraphButton = Button(self.infoFrame, text="Close Graph", command=plt.close)
+        self.closeGraphButton.grid(column=0, row=5, pady=5, padx=10)
 
     def initMathWidgets(self):
         #Label
-        self.mathLabel = Label(self.infoFrame, text='Math Analysis', font=self.font)
+        self.mathLabel = Label(self.infoFrame, text='Math File', font=self.font)
         self.mathLabel['foreground'] = 'blue'
         self.mathLabel.grid(column=1, row=0, pady=5, padx=20)
+        #LabelStatus
+        self.mathLabelStatus = Label(self.infoFrame, text='File: NONE', font=self.font)
+        self.mathLabelStatus['foreground'] = 'red'
+        self.mathLabelStatus.grid(column=1, row=1, pady=5, padx=20)
         #maybe a math file entry box
         self.mathEntryText = StringVar()
-        self.mathEntry = Entry(self.infoFrame, text=self.mathEntryText)
-        self.mathEntry.insert(0, 'Maybe Temporary')
-        self.mathEntry.grid(column=1, row=1, pady=5, padx=20)
+        self.mathEntry = Entry(self.infoFrame, textvariable=self.mathEntryText)
+        self.mathEntry.insert(0, mathFilePath)
+        self.mathEntry.grid(column=1, row=2, pady=5, padx=20)
         #button to make graph
-        self.mathButton = Button(self.infoFrame, text="Graph", command=self.mathButtonCmd)
-        self.mathButton.grid(column=1, row=2, pady=5, padx=20)
+        self.mathButton = Button(self.infoFrame, text="Define Math File", command=self.mathButtonCmd)
+        self.mathButton.grid(column=1, row=3, pady=5, padx=20)
 
     def initPathWidgets(self):
         #Label
         self.infoFrameLabel = Label(self.infoFrame, text='Data File Path', font=self.font)
-        self.infoFrameLabel['foreground'] = 'green'
+        self.infoFrameLabel['foreground'] = 'blue'
         self.infoFrameLabel.grid(column=0, row=0, pady=5, padx=10)
+        #Label Status
+        self.pathStatusLabel = Label(self.infoFrame, text='Path: NONE', font=self.font)
+        self.pathStatusLabel['foreground'] = 'red'
+        self.pathStatusLabel.grid(column=0, row=1, pady=5, padx=10)
         #path entry box
         self.pathEntryText = StringVar()
-        self.pathEntry = Entry(self.infoFrame, text=self.pathEntryText)
+        self.pathEntry = Entry(self.infoFrame, textvariable=self.pathEntryText)
         self.pathEntry.insert(0, dataFilePath)
-        self.pathEntry.grid(column=0, row=1, pady=5, padx=10)
+        self.pathEntry.grid(column=0, row=2, pady=5, padx=10)
         #button
         self.pathButton = Button(self.infoFrame, text="Update", command=self.pathButtonCmd)
-        self.pathButton.grid(column=0, row=2, pady=5, padx=10)
+        self.pathButton.grid(column=0, row=3, pady=5, padx=10)
+
     def pathButtonCmd(self):
         path = self.pathEntry.get()
-        dataTreeFrame.update_DataTree(path)
+        self.arrays = dataTreeFrame.update_DataTree(path)
+        print(self.arrays)
+        if self.arrays != [[],[]]:
+            self.pathStatusLabel['text'] = "Path: " + path
+            self.pathStatusLabel['foreground'] = 'green'
+            self.pathEntryText.set("")
+        else:
+            self.pathStatusLabel['text'] = "Path: NONE"
+            self.pathStatusLabel['foreground'] = 'red'
+
     def mathButtonCmd(self):
-        print("You clicked the Graph Button")
+        mathFilePath = self.mathEntry.get()
+        try:
+            self.mathFileImport = __import__(mathFilePath)
+            self.mathLabelStatus['text'] = "File: " + mathFilePath
+            self.mathLabelStatus['foreground'] = 'green'
+            self.mathEntryText.set("")
+        except:
+            self.mathFileImport = None
+            self.mathLabelStatus['text'] = "File: NONE"
+            self.mathLabelStatus['foreground'] = 'red'
+    def graphButtonCmd(self):
+        try:   
+            newArrays = self.mathFileImport.analyze(self.arrays)
+            plt.plot(newArrays[0], newArrays[1])
+        except:
+            plt.plot(self.arrays[0], self.arrays[1])
 
-
+        plt.show()
+        
 #class that defines the datatree class
 #attempt at a sort of static class
 class dataTreeFrame(Frame):
@@ -190,15 +250,19 @@ class dataTreeFrame(Frame):
     def update_DataTree(path):
         tf_fileClass = dataTreeFrame.assignFile(path)
         tf_x = tf_fileClass.xArray
-        print(tf_x)
         tf_y = tf_fileClass.yArray
+        tf_arrays = [tf_x, tf_y]
         
         dataTreeFrame.update_TreeView(tf_x, tf_y, dataTreeFrame.tf_dataTree, dataTreeFrame.tf_scrollbar)
+
+        return tf_arrays
 
 
 #main fcn that calls fcns to make window
 def main():
     root = Tk()
+    img = PhotoImage(file='icon.png')
+    root.tk.call('wm', 'iconphoto', root._w, img)
     app = main_window(root)
 
     root.mainloop()
