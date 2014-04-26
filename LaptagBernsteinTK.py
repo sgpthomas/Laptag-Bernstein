@@ -152,7 +152,7 @@ class infoFrameClass(Frame):
         self.mathEntry.insert(0, mathFilePath)
         self.mathEntry.grid(column=1, row=2, pady=5, padx=20)
         #paste button
-        self.mathPasteButton = Button(self.infoFrame, text="Paste", command=self.mathEntryPaste)
+        self.mathPasteButton = Button(self.infoFrame, text="Clear", command=self.mathEntryPaste)
         self.mathPasteButton.grid(column=1, row=4, pady=5, padx=20)
         #button to make graph
         self.mathButton = Button(self.infoFrame, text="Define Math File", command=self.mathButtonCmd)
@@ -173,7 +173,7 @@ class infoFrameClass(Frame):
         self.pathEntry.insert(0, dataFilePath)
         self.pathEntry.grid(column=0, row=2, pady=5, padx=10)
         #paste button
-        self.pathPasteButton = Button(self.infoFrame, text="Paste", command=self.pathEntryPaste)
+        self.pathPasteButton = Button(self.infoFrame, text="Clear", command=self.pathEntryPaste)
         self.pathPasteButton.grid(column=0, row=4, pady=5, padx=10)
         #button
         self.pathButton = Button(self.infoFrame, text="Update", command=self.pathButtonCmd)
@@ -212,16 +212,10 @@ class infoFrameClass(Frame):
         plt.show()
 
     def mathEntryPaste(self, *event):
-        try:
-            self.mathEntryText.set(self.parent.clipboard_get())
-        except:
-            print('Nothing On Clipboard')
+        self.mathEntryText.set("")
 
     def pathEntryPaste(self, *event):
-        try:
-            self.pathEntryText.set(self.parent.clipboard_get())
-        except:
-            print('Nothing On Clipboard')
+        self.pathEntryText.set("")
         
 #class that defines the datatree class
 #attempt at a sort of static class
