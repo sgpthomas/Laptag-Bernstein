@@ -1,3 +1,4 @@
+#! python3
 """
 
 Laptag Bernstein Wave Analyzation Program with Tkinter User Interface
@@ -22,6 +23,7 @@ except:
     dataFilePath = ''
     mathFilePath = ''
     print("No Path Given")
+    print("No Math File Given")
 
 #TK Window
 class main_window(Frame):
@@ -60,15 +62,21 @@ class main_window(Frame):
         self.filemenu = Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="Save", command=self.save)
         self.filemenu.add_separator()
-        self.filemenu.add_command(label="Quit", command=self.parent.quit)
+        self.filemenu.add_command(label="Quit", command=self.quitWindow)
         self.menubar.add_cascade(label="File", menu=self.filemenu)
 
         #display menubar
         self.parent.config(menu=self.menubar)
 
+        #some random bindings
+        self.parent.bind("<Control-q>", self.quitWindow)
+
     def save(self):
         #TODO - add save functionality
         print('save')
+
+    def quitWindow(self, *event):
+        self.parent.destroy()
 
     #center window
     def centerWindow(self):
@@ -83,7 +91,6 @@ class main_window(Frame):
 class readFileClass(object):
     def __init__(self, fileName):
         self.fileName = fileName
-        print(self.fileName)
         self.xArray = []
         self.yArray = []
 
@@ -108,6 +115,7 @@ class infoFrameClass(Frame):
     def __init__(self, parent):
         #frame
         self.infoFrame = Frame(parent)
+        self.parent = parent
         #path widgets
         self.font = ('Ubuntu', 12)
         self.initPathWidgets()
@@ -118,12 +126,16 @@ class infoFrameClass(Frame):
         self.mathFileImport = None
 
     def initGraphWidgets(self):
+        #label
+        self.graphLabel = Label(self.infoFrame, text='Graph Options', font=self.font)
+        self.graphLabel['foreground'] = 'blue'
+        self.graphLabel.grid(column=3, row=0, pady=5, padx=20)
         #graph button
         self.graphButton = Button(self.infoFrame, text="Graph", command=self.graphButtonCmd)
-        self.graphButton.grid(column=0, row=4, pady=5, padx=10)
+        self.graphButton.grid(column=3, row=1, pady=5, padx=20)
         #close graph button
         self.closeGraphButton = Button(self.infoFrame, text="Close Graph", command=plt.close)
-        self.closeGraphButton.grid(column=0, row=5, pady=5, padx=10)
+        self.closeGraphButton.grid(column=3, row=2, pady=5, padx=20)
 
     def initMathWidgets(self):
         #Label
@@ -139,6 +151,9 @@ class infoFrameClass(Frame):
         self.mathEntry = Entry(self.infoFrame, textvariable=self.mathEntryText)
         self.mathEntry.insert(0, mathFilePath)
         self.mathEntry.grid(column=1, row=2, pady=5, padx=20)
+        #paste button
+        self.mathPasteButton = Button(self.infoFrame, text="Paste", command=self.mathEntryPaste)
+        self.mathPasteButton.grid(column=1, row=4, pady=5, padx=20)
         #button to make graph
         self.mathButton = Button(self.infoFrame, text="Define Math File", command=self.mathButtonCmd)
         self.mathButton.grid(column=1, row=3, pady=5, padx=20)
@@ -157,6 +172,9 @@ class infoFrameClass(Frame):
         self.pathEntry = Entry(self.infoFrame, textvariable=self.pathEntryText)
         self.pathEntry.insert(0, dataFilePath)
         self.pathEntry.grid(column=0, row=2, pady=5, padx=10)
+        #paste button
+        self.pathPasteButton = Button(self.infoFrame, text="Paste", command=self.pathEntryPaste)
+        self.pathPasteButton.grid(column=0, row=4, pady=5, padx=10)
         #button
         self.pathButton = Button(self.infoFrame, text="Update", command=self.pathButtonCmd)
         self.pathButton.grid(column=0, row=3, pady=5, padx=10)
@@ -164,7 +182,6 @@ class infoFrameClass(Frame):
     def pathButtonCmd(self):
         path = self.pathEntry.get()
         self.arrays = dataTreeFrame.update_DataTree(path)
-        print(self.arrays)
         if self.arrays != [[],[]]:
             self.pathStatusLabel['text'] = "Path: " + path
             self.pathStatusLabel['foreground'] = 'green'
@@ -184,6 +201,7 @@ class infoFrameClass(Frame):
             self.mathFileImport = None
             self.mathLabelStatus['text'] = "File: NONE"
             self.mathLabelStatus['foreground'] = 'red'
+
     def graphButtonCmd(self):
         try:   
             newArrays = self.mathFileImport.analyze(self.arrays)
@@ -192,6 +210,18 @@ class infoFrameClass(Frame):
             plt.plot(self.arrays[0], self.arrays[1])
 
         plt.show()
+
+    def mathEntryPaste(self, *event):
+        try:
+            self.mathEntryText.set(self.parent.clipboard_get())
+        except:
+            print('Nothing On Clipboard')
+
+    def pathEntryPaste(self, *event):
+        try:
+            self.pathEntryText.set(self.parent.clipboard_get())
+        except:
+            print('Nothing On Clipboard')
         
 #class that defines the datatree class
 #attempt at a sort of static class
