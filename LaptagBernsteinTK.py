@@ -185,7 +185,7 @@ class infoFrameClass(Frame):
         if self.arrays != [[],[]]:
             self.pathStatusLabel['text'] = "Path: " + path
             self.pathStatusLabel['foreground'] = 'green'
-            self.pathEntryText.set("")
+            #self.pathEntryText.set("")
         else:
             self.pathStatusLabel['text'] = "Path: NONE"
             self.pathStatusLabel['foreground'] = 'red'
@@ -196,7 +196,7 @@ class infoFrameClass(Frame):
             self.mathFileImport = __import__(mathFilePath)
             self.mathLabelStatus['text'] = "File: " + mathFilePath
             self.mathLabelStatus['foreground'] = 'green'
-            self.mathEntryText.set("")
+            #self.mathEntryText.set("")
         except:
             self.mathFileImport = None
             self.mathLabelStatus['text'] = "File: NONE"
